@@ -1,7 +1,12 @@
 require 'securerandom'
 require 'spec_helper_acceptance'
+require 'nokogiri'
+require 'cgi'
 
 $ip = '10.0.2.15'
+
+skip_e2e_tests = !ENV['KUBERNETES_E2E']
+puts skip_e2e_tests
 
 describe '::pupperentes::single_node' do
   let :cluster_name do
@@ -116,6 +121,53 @@ class{'tarmak::single_node':
       expect(result.exit_code).to eq(0)
       expect(result.stdout.scan(/Running/m).size).to eq(1)
       expect(result.stdout.scan(/1\/1/m).size).to eq(1)
+    end
+
+    it 'should deploy e2e tests', :retry => 20, :retry_wait => 5, skip: skip_e2e_tests do
+      puts skip_e2e_tests
+      result = shell('/opt/bin/kubectl apply -f /etc/puppetlabs/code/modules/tarmak/files/sonobouy.yml')
+      logger.notify "kubectl apply sonobouy.yml:\n#{result.stdout}"
+      logger.notify "kubectl apply sonobuoy.yml err:\n#{result.stderr}"
+      expect(result.exit_code).to eq(0)
+    end
+
+    it 'should wait for e2e tests to complete', :retry => 1000, :retry_wait => 10, skip: skip_e2e_tests do
+      result = shell('/opt/bin/kubectl logs sonobuoy --namespace=heptio-sonobuoy')
+      logger.notify "kubectl logs sonobuoy --namespace=heptio-sonobuoy:\n#{result.stdout}"
+      expect(result.stdout.scan(/sonobuoy is now blocking/m).size).to be >= 1
+    end
+
+    it 'should get e2e tests results', skip: skip_e2e_tests do
+      result = shell('/opt/bin/kubectl cp heptio-sonobuoy/sonobuoy:/tmp/sonobuoy ./results --namespace=heptio-sonobuoy')
+      expect(result.exit_code).to eq(0)
+
+      result = shell('tar xzf results/*.tar.gz')
+      expect(result.exit_code).to eq(0)
+
+      result = shell('cat plugins/e2e/results/junit_01.xml')
+      expect(result.exit_code).to eq(0)
+
+      # this is pretty grim, hopefully there's a better way
+      e2e = Nokogiri::XML(result.stdout)
+      testcases = e2e.xpath("//testcase")
+      expect(testcases.size).to be >= 1
+
+      testcases.each do |test|
+        if test.attribute('time').to_s.to_f > 0
+          name = test.attribute('name')
+          failure = test.at('./failure')
+
+          passed = failure ? false : true
+          if not passed
+            logger.error "#{name}: #{CGI.unescapeHTML(failure.content.to_s)}"
+          else
+            logger.notify name.to_s
+          end
+        end
+      end
+
+      testsuite = e2e.xpath("//testsuite")
+      expect(testsuite.attr('failures').to_s.to_i).to eq(0)
     end
   end
 end

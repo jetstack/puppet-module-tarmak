@@ -31,6 +31,7 @@ class tarmak::overlay_calico {
   if $::tarmak::role == 'master' {
     class { 'calico::config': }
     Class['calico::config'] -> class { 'calico::policy_controller': }
+    Class['calico::config'] -> class { 'calico::disable_source_destination_check': }
     Class['calico::config'] -> class { 'calico::node': }
   }
 }

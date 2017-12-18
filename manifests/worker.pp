@@ -22,7 +22,7 @@ class tarmak::worker {
     base_path    => $kubelet_base_path,
     common_name  => "system:node:${::fqdn}",
     role         => "${::tarmak::cluster_name}/pki/${::tarmak::kubernetes_ca_name}/sign-verbatim/kubelet",
-    organisation => 'system:nodes',
+    organisation => ['system:nodes'],
     uid          => $::tarmak::kubernetes_uid,
     require      => [
       User[$::tarmak::kubernetes_user],

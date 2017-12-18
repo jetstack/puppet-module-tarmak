@@ -97,7 +97,7 @@ class tarmak::master(
     base_path    => $admin_base_path,
     common_name  => 'admin',
     role         => "${::tarmak::cluster_name}/pki/${::tarmak::kubernetes_ca_name}/sign-verbatim/admin",
-    organisation => 'system:masters',
+    organisation => ['system:masters'],
     uid          => $::tarmak::kubernetes_uid,
   }
 

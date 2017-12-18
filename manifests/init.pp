@@ -40,7 +40,7 @@ class tarmak (
   String $kubernetes_pod_network = '10.234.0.0/16',
   String $kubernetes_api_url = nil,
   String $kubernetes_api_prefix = 'api',
-  Array[Enum['AlwaysAllow', 'ABAC', 'RBAC']] $kubernetes_authorization_mode = [],
+  Array[Enum['AlwaysAllow', 'ABAC', 'RBAC', 'Node']] $kubernetes_authorization_mode = [],
   String $dns_root = $tarmak::params::dns_root,
   String $hostname = $tarmak::params::hostname,
   Array[String] $etcd_cluster = [],

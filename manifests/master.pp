@@ -94,10 +94,11 @@ class tarmak::master(
 
   $admin_base_path = "${::tarmak::kubernetes_ssl_dir}/kube-admin"
   vault_client::cert_service { 'kube-admin':
-    base_path   => $admin_base_path,
-    common_name => 'admin',
-    role        => "${::tarmak::cluster_name}/pki/${::tarmak::kubernetes_ca_name}/sign/admin",
-    uid         => $::tarmak::kubernetes_uid,
+    base_path    => $admin_base_path,
+    common_name  => 'admin',
+    role         => "${::tarmak::cluster_name}/pki/${::tarmak::kubernetes_ca_name}/sign-verbatim/admin",
+    organisation => 'system:masters',
+    uid          => $::tarmak::kubernetes_uid,
   }
 
   $etcd_apiserver_base_path = "${::tarmak::kubernetes_ssl_dir}/${::tarmak::etcd_k8s_main_ca_name}"

@@ -19,15 +19,16 @@ class tarmak::worker {
 
   $kubelet_base_path = "${::tarmak::kubernetes_ssl_dir}/kubelet"
   vault_client::cert_service { 'kubelet':
-    base_path   => $kubelet_base_path,
-    common_name => "system:node:${::fqdn}",
-    role        => "${::tarmak::cluster_name}/pki/${::tarmak::kubernetes_ca_name}/sign/kubelet",
-    uid         => $::tarmak::kubernetes_uid,
-    require     => [
+    base_path    => $kubelet_base_path,
+    common_name  => "system:node:${::fqdn}",
+    role         => "${::tarmak::cluster_name}/pki/${::tarmak::kubernetes_ca_name}/sign-verbatim/kubelet",
+    organisation => 'system:nodes',
+    uid          => $::tarmak::kubernetes_uid,
+    require      => [
       User[$::tarmak::kubernetes_user],
       Class['vault_client']
     ],
-    exec_post   => [
+    exec_post    => [
       "-${::tarmak::systemctl_path} --no-block try-restart kubelet.service"
     ],
   }

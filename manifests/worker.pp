@@ -1,4 +1,6 @@
-class tarmak::worker {
+class tarmak::worker(
+  $vault_client_frequency = 600,
+){
   include ::tarmak
   require ::vault_client
 
@@ -8,6 +10,7 @@ class tarmak::worker {
     common_name => 'system:kube-proxy',
     role        => "${::tarmak::cluster_name}/pki/${::tarmak::kubernetes_ca_name}/sign/kube-proxy",
     uid         => $::tarmak::kubernetes_uid,
+    frequency   => $vault_client_frequency,
     require     => [
       User[$::tarmak::kubernetes_user],
       Class['vault_client']
@@ -24,6 +27,7 @@ class tarmak::worker {
     role         => "${::tarmak::cluster_name}/pki/${::tarmak::kubernetes_ca_name}/sign-verbatim/kubelet",
     organisation => ['system:nodes'],
     uid          => $::tarmak::kubernetes_uid,
+    frequency    => $vault_client_frequency,
     require      => [
       User[$::tarmak::kubernetes_user],
       Class['vault_client']

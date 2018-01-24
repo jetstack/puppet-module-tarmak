@@ -1,4 +1,5 @@
 class tarmak::etcd(
+  $vault_client_frequency = 600,
 ){
   include ::tarmak
   include ::vault_client
@@ -45,6 +46,7 @@ class tarmak::etcd(
     ip_sans     => $ip_sans,
     role        => "${tarmak::cluster_name}/pki/${::tarmak::etcd_k8s_main_ca_name}/sign/server",
     uid         => $::tarmak::etcd_uid,
+    frequency   => $vault_client_frequency,
     exec_post   => [
       "-${::tarmak::systemctl_path} --no-block try-restart etcd-k8s-main.service etcd-k8s-events.service"
     ],
@@ -57,6 +59,7 @@ class tarmak::etcd(
     ip_sans     => $ip_sans,
     role        => "${tarmak::cluster_name}/pki/${::tarmak::etcd_overlay_ca_name}/sign/server",
     uid         => $::tarmak::etcd_uid,
+    frequency   => $vault_client_frequency,
     require     => [ User[$::tarmak::etcd_user], File[$::tarmak::etcd_ssl_dir] ],
     exec_post   => [
       "-${::tarmak::systemctl_path} --no-block try-restart etcd-overlay.service"

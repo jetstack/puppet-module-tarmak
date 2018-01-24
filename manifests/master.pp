@@ -1,6 +1,7 @@
 class tarmak::master(
   $disable_kubelet = true,
   $disable_proxy = true,
+  $vault_client_frequency = 600,
 ){
   include ::tarmak
   include ::vault_client
@@ -35,6 +36,7 @@ class tarmak::master(
     common_name => 'system:kube-controller-manager',
     role        => "${::tarmak::cluster_name}/pki/${::tarmak::kubernetes_ca_name}/sign/kube-controller-manager",
     uid         => $::tarmak::kubernetes_uid,
+    frequency   => $vault_client_frequency,
     exec_post   => [
       "-${::tarmak::systemctl_path} --no-block try-restart kube-controller-manager.service"
     ],
@@ -46,6 +48,7 @@ class tarmak::master(
     common_name => 'system:kube-scheduler',
     role        => "${::tarmak::cluster_name}/pki/${::tarmak::kubernetes_ca_name}/sign/kube-scheduler",
     uid         => $::tarmak::kubernetes_uid,
+    frequency   => $vault_client_frequency,
     exec_post   => [
       "-${::tarmak::systemctl_path} --no-block try-restart kube-scheduler.service"
     ],
@@ -59,6 +62,7 @@ class tarmak::master(
     uid         => $::tarmak::kubernetes_uid,
     ip_sans     => $apiserver_ip_sans,
     alt_names   => $apiserver_alt_names,
+    frequency   => $vault_client_frequency,
     exec_post   => [
       "-${::tarmak::systemctl_path} --no-block try-restart kube-apiserver.service"
     ],
@@ -77,6 +81,7 @@ class tarmak::master(
       common_name => 'kube-apiserver-proxy',
       role        => "${::tarmak::cluster_name}/pki/${::tarmak::kubernetes_api_proxy_ca_name}/sign/kube-apiserver",
       uid         => $::tarmak::kubernetes_uid,
+      frequency   => $vault_client_frequency,
       exec_post   => [
         "-${::tarmak::systemctl_path} --no-block try-restart kube-apiserver.service"
       ],
@@ -99,6 +104,7 @@ class tarmak::master(
     role         => "${::tarmak::cluster_name}/pki/${::tarmak::kubernetes_ca_name}/sign-verbatim/admin",
     organisation => ['system:masters'],
     uid          => $::tarmak::kubernetes_uid,
+    frequency    => $vault_client_frequency,
   }
 
   $etcd_apiserver_base_path = "${::tarmak::kubernetes_ssl_dir}/${::tarmak::etcd_k8s_main_ca_name}"
@@ -109,6 +115,7 @@ class tarmak::master(
     ip_sans     => [$::tarmak::ipaddress],
     alt_names   => ["${::hostname}.${::tarmak::cluster_name}.${::tarmak::dns_root}"],
     uid         => $::tarmak::kubernetes_uid,
+    frequency   => $vault_client_frequency,
     exec_post   => [
       "-${::tarmak::systemctl_path} --no-block try-restart kube-apiserver.service"
     ],

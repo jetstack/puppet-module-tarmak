@@ -44,26 +44,21 @@ spec:
   - echo "git.jetstack.net ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBJhXGTTVqF6wsQMtgr6SnTdX2VkEE6ORVITsuS5yGt/+E18022+vqLJ8cQDqr+zS7t6C+hObFxOlt9+p4q5HWmA=" >> ~/.ssh/known_hosts
   - bundle install
   - bundle exec rake ${TASK}
-  only:
-  - master
 
 beaker::centos-7-k8s-1.7:
   <<: *beaker_definition
-  only: []
   variables:
     KUBERNETES_VERSION: 1.7.0-rc.1
     TASK: beaker
 
 beaker::centos-7-k8s-1.6:
   <<: *beaker_definition
-  only: []
   variables:
     KUBERNETES_VERSION: 1.6.5
     TASK: beaker
 
 beaker::centos-7-k8s-1.6-no-rbac:
   <<: *beaker_definition
-  only: []
   variables:
     KUBERNETES_VERSION: 1.5.7
     KUBERNETES_AUTHORIZATION_MODE: "['ABAC']"
@@ -71,14 +66,12 @@ beaker::centos-7-k8s-1.6-no-rbac:
 
 beaker::centos-7-k8s-1.5:
   <<: *beaker_definition
-  only: []
   variables:
     KUBERNETES_VERSION: 1.5.7
     TASK: beaker
 
 beaker::centos-7-k8s-1.5-rbac:
   <<: *beaker_definition
-  only: []
   variables:
     KUBERNETES_VERSION: 1.5.7
     KUBERNETES_AUTHORIZATION_MODE: "['RBAC']"
@@ -100,3 +93,11 @@ beaker::ubuntu-1604-k8s-latest:
   <<: *beaker_definition
   variables:
     TASK: beaker:ubuntu_1604_single_node
+
+beaker::centos-7-k8s-1.7-e2e:
+  <<: *beaker_definition
+  variables:
+    KUBERNETES_VERSION: 1.7.9
+    KUBERNETES_AUTHORIZATION_MODE: "['RBAC']"
+    TASK: beaker
+    KUBERNETES_E2E: 1
